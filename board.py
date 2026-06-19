@@ -8,3 +8,6 @@ class GameState():
                  ["--", "--","--","--","--","--","--","--"],
                  ["wP", "wP","wP","wP","wP","wP","wP","wP"],
                  ["wR", "wN","wB","wQ","wK","wB","wN","wR"]]
+
+def moves(x_coordinate, y_coordinate):
+    pass
