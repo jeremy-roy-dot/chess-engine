@@ -30,7 +30,8 @@ while running:
 
             if gs[y][x] != "--":
                 selected = True
-                board.highlight(y, x)
+                coordinates = board.highlight(y, x)
+                print(coordinates)
 
     screen.fill("Black")
 

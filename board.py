@@ -18,22 +18,34 @@ def highlight(y, x):
 
 def straights_logic(y, x) -> list: #outputs list of tuples that represent possible moves
     coordinates = []
-    for i in range(len(main.gs[y])):
-        if i == x:
-            continue
-        case = main.gs[y][i]
-        if case != "--":
-            coordinates.append(i)
-    if not coordinates:
-        for n in range(8):
-            if n == x:
-                continue
-            coordinates.append((y, n))
-    else:
-        coordinates.append(x)
-        coordinates.sort()
-        idx = coordinates.index(x)
+    for i in range(x + 1, 8): #checks columns to the right
+        if main.gs[y][i] == "--":
+            coordinates.append((y, i))
+        else:
+            coordinates.append((y, i))
+            break
 
+    for i in range(x - 1, -1, -1): #checks columns to the left
+        if main.gs[y][i] == "--":
+            coordinates.append((y, i))
+        else:
+            coordinates.append((y, i))
+            break
+
+    for i in range(y + 1, 8): #checks row below
+        if main.gs[i][x] == "--":
+            coordinates.append((i, x))
+        else:
+            coordinates.append((i, x))
+            break
+    
+    for i in range(y - 1, -1, -1): #checks row above
+        if main.gs[i][x] == "--":
+            coordinates.append((i, x))
+        else:
+            coordinates.append((i, x))
+            break
+        
     return coordinates
 
 def diagonals_logic(y, x):
