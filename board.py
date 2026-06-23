@@ -30,28 +30,20 @@ def straights_logic(y, x, board_state) -> list: #outputs list of tuples that rep
         current_x = x + direction
         current_y = y + direction
 
-        vertical_done = False
-        horizontal_done = False
-
-        while 0 <= current_x <= 7 or 0 <= current_y <= 7:
+        while 0 <= current_x <= 7:
+            if board_state[y][current_x] == "--":
+                coordinates.append((y, current_x))
+                current_x += direction
+            else:
+                coordinates.append((y, current_x))
+                break
             
-            if not horizontal_done:
-                if board_state[y][current_x] == "--":
-                    coordinates.append((y, current_x))
-                    current_x += direction
-                else:
-                    coordinates.append((y, current_x))
-                    horizontal_done = True
-            
-            if not vertical_done:
-                if board_state[current_y][x] == "--":
-                    coordinates.append((current_y, x))
-                    current_y += direction
-                else:
-                    coordinates.append((current_y, x))
-                    vertical_done = True
-            
-            if horizontal_done and vertical_done:
+        while 0 <= current_y <= 7:
+            if board_state[current_y][x] == "--":
+                coordinates.append((current_y, x))
+                current_y += direction
+            else:
+                coordinates.append((current_y, x))
                 break
 
     return coordinates

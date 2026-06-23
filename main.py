@@ -37,6 +37,8 @@ while running:
             if 0 <= x <= 7 and 0 <= y <= 7:
                 print(x, y)
                 if gs.board[y][x] != "--":
+                    coordinates = board.highlight(y, x, gs.board)
+                    print(coordinates)
                     selected = True
                     
 
