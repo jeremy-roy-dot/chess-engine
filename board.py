@@ -70,4 +70,6 @@ def diagonals_logic(y, x, board_state):
     return coordinates
 
 def horse_logic(y, x):
-    pass
+    directions = [(2, 1), (2, -1), (-2, 1), (-2, -1)]
+
+    
