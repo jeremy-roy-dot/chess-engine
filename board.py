@@ -48,6 +48,7 @@ def straights_logic(y, x, board_state) -> list: #outputs list of tuples that rep
                     coordinates.append((current_y, x))
                     current_y += direction
                 else:
+                    coordinates.append((current_y, x))
                     vertical_done = True
             
             if horizontal_done and vertical_done:
@@ -65,7 +66,7 @@ def diagonals_logic(y, x, board_state):
         current_y  = y + dy
         current_x = x + dx
 
-        while 0 <= current_y <= 7 or 0 <= current_x <= 7:
+        while 0 <= current_y <= 7 and 0 <= current_x <= 7:
             if board_state[current_y][current_x] == "--":
                 coordinates.append((current_y, current_x))
                 current_x += dx

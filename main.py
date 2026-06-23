@@ -24,14 +24,21 @@ while running:
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             coordinates = event.pos
             x, y = coordinates
-            x = int(((x - 560)/100)) #board x coordinate
-            y = int((y - 140)/100) #board y coordinate
-            print(y, x)
+            x = (x - 560)/100 #board x coordinate
+            y = (y - 140)/100 #board y coordinate
 
-            if gs.board[y][x] != "--":
-                selected = True
-                coordinates = board.highlight(y, x, gs.board)
-                print(coordinates)
+            if 0 > x or 0 > y:
+                x = -1
+                y = -1
+            else:
+                x = int(x)
+                y = int(y)
+            
+            if 0 <= x <= 7 and 0 <= y <= 7:
+                print(x, y)
+                if gs.board[y][x] != "--":
+                    selected = True
+                    
 
     screen.fill("Black")
 
