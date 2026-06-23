@@ -28,9 +28,9 @@ while running:
             y = int((y - 140)/100) #board y coordinate
             print(y, x)
 
-            if gs[y][x] != "--":
+            if gs.board[y][x] != "--":
                 selected = True
-                coordinates = board.highlight(y, x)
+                coordinates = board.highlight(y, x, gs.board)
                 print(coordinates)
 
     screen.fill("Black")
