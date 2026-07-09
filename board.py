@@ -70,6 +70,14 @@ def diagonals_logic(y, x, board_state):
     return coordinates
 
 def horse_logic(y, x):
-    directions = [(2, 1), (2, -1), (-2, 1), (-2, -1)]
+    directions = [(2, 1), (2, -1), (-2, 1), (-2, -1), (1, 2), (1, -2), (-1, 2), (-1, -2)]
+    coordinates = []
 
-    
+    for dy, dx in directions:
+        cy = y + dy
+        cx = x + dx
+
+        if (0 <= cy <= 7 and 0 <= cx <= 7):
+            coordinates.append((cy, cx))
+            
+    return coordinates
