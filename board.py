@@ -8,18 +8,16 @@ class GameState():
                  ["--", "--","--","--","--","--","--","--"],
                  ["wP", "wP","wP","wP","wP","wP","wP","wP"],
                  ["wR", "wN","wB","wQ","wK","wB","wN","wR"]]
+        self.move_history = {}  # stores move in the following form: { wP *piece* : [(2, 1) *origin*, (2, 3) *endpoint*] }
 
 def moves(y_coordinate, x_coordinate):
     pass
 
-def highlight(y, x, board_state):
-    piece = board_state[y][x]
-    coordinates = straights_logic(y, x, board_state)
-    coordinates.append(diagonals_logic(y, x, board_state))
-    return coordinates
+# Determines the piece, set the valid move rules, calls on all relevant logics, output a list of valid coordinates
+def logic_coordinators(y, x, board_state, move_history):
+    pass
 
-#Bug when clicking on boarder it will try to get to an index that is out of range and crash the app (bug happens when clicking top or bottom)
-def straights_logic(y, x, board_state) -> list: #outputs list of tuples that represent possible moves
+def straights_logic(y, x, board_state) -> list:
 
     coordinates = []
     
@@ -81,3 +79,24 @@ def horse_logic(y, x):
             coordinates.append((cy, cx))
             
     return coordinates
+
+def pawn_logic(y, x, move_history, board_state):
+    coordinates = []
+    
+    if y == 1:
+        if board_state[y + 1][x] == "--" and board_state[y + 2][x] == "--":
+            coordinates.append((y + 2, x))
+
+    if board_state[y + 1][x] == "--":
+        coordinates.append((y + 1, x))
+
+    if x < 7:
+        if board_state[y + 1][x + 1] != "--":
+            coordinates.append((y + 1, x + 1))
+    if x > 0:
+        if board_state[y + 1][x - 1] != "--":
+            coordinates.append((y + 1, x - 1))
+    
+    return coordinates
+    
+

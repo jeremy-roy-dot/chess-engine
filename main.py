@@ -37,9 +37,9 @@ while running:
             if 0 <= x <= 7 and 0 <= y <= 7:
                 print(x, y)
                 if gs.board[y][x] != "--":
-                    coordinates = board.highlight(y, x, gs.board)
-                    print(coordinates)
-                    selected = True
+                    #Calls on move logic and highlights the selected piece, puts dots on valid squares and captures
+                    coordinates = board.logic_coordinators(y, x, gs.board, gs.move_history)
+                    
                     
 
     screen.fill("Black")
