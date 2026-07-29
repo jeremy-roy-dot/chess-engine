@@ -12,10 +12,16 @@ assets = os.listdir("assets")
 
 images = {}
 
+selected = False
+coordinates = None
+
 for file in assets:
     piece = file.strip(".png")
     images[piece] = pygame.image.load(f"assets/{file}").convert_alpha()
     images[piece] = pygame.transform.scale(images[piece], (100, 100))
+
+circle_surface = pygame.Surface((100, 100), pygame.SRCALPHA)
+pygame.draw.circle(circle_surface, (127, 127, 127, 180), (50, 50), 20)   
 
 while running:
     for event in pygame.event.get():
@@ -39,9 +45,15 @@ while running:
                 if gs.board[y][x] != "--":
                     #Calls on move logic and highlights the selected piece, puts dots on valid squares and captures
                     coordinates = board.logic_coordinators(y, x, gs.board, gs.move_history)
+                    if coordinates:
+                        selected = True
+                else:
+                    coordinates = None
+                    selected = False
+            else:
+                coordinates = None
+                selected = False
                     
-                    
-
     screen.fill("Black")
 
     pygame.draw.rect(screen, (133, 203, 51), (510, 90, 900, 900))
@@ -67,6 +79,12 @@ while running:
         pixel_y += 100
         pixel_x = 560
 
+    if selected:
+        for y, x in coordinates:
+            y = y * 100 + 140
+            x = x * 100 + 560
+            screen.blit(circle_surface, (x, y))
+    
     pygame.display.flip()
 
     clock.tick(60)

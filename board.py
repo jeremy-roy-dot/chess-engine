@@ -8,19 +8,38 @@ class GameState():
                  ["--", "--","--","--","--","--","--","--"],
                  ["wP", "wP","wP","wP","wP","wP","wP","wP"],
                  ["wR", "wN","wB","wQ","wK","wB","wN","wR"]]
-        self.move_history = {}  # stores move in the following form: { wP *piece* : [(2, 1) *origin*, (2, 3) *endpoint*] }
-
-def moves(y_coordinate, x_coordinate):
-    pass
+        self.move_history = []
 
 # Determines the piece, set the valid move rules, calls on all relevant logics, output a list of valid coordinates
 def logic_coordinators(y, x, board_state, move_history):
-    pass
+    piece = board_state[y][x]
+    coordinates = []
+    
+    if "b" in piece:
+        return []
+
+    if "P" in piece:
+        pass
+    elif "R" in piece:
+        coordinates += straights_logic(y, x, board_state)
+        return coordinates
+    elif "B" in piece:
+        coordinates += diagonals_logic(y, x, board_state)
+        return coordinates
+    elif "Q" in piece:
+        coordinates += straights_logic(y, x, board_state)
+        coordinates += diagonals_logic(y, x, board_state)
+        return coordinates
+    elif "N" in piece:
+        coordinates += horse_logic(y, x, board_state)
+        return coordinates
+    else:
+        coordinates += king_logic(y, x, board_state)
+        return coordinates
 
 def straights_logic(y, x, board_state) -> list:
 
     coordinates = []
-    
     directions = [1, -1]
 
     for direction in directions:
@@ -67,7 +86,7 @@ def diagonals_logic(y, x, board_state):
 
     return coordinates
 
-def horse_logic(y, x):
+def horse_logic(y, x, board_state):
     directions = [(2, 1), (2, -1), (-2, 1), (-2, -1), (1, 2), (1, -2), (-1, 2), (-1, -2)]
     coordinates = []
 
@@ -75,7 +94,7 @@ def horse_logic(y, x):
         cy = y + dy
         cx = x + dx
 
-        if (0 <= cy <= 7 and 0 <= cx <= 7):
+        if (0 <= cy <= 7 and 0 <= cx <= 7) and not "w" in board_state[cy][cx]:
             coordinates.append((cy, cx))
             
     return coordinates
@@ -96,7 +115,19 @@ def pawn_logic(y, x, move_history, board_state):
     if x > 0:
         if board_state[y + 1][x - 1] != "--":
             coordinates.append((y + 1, x - 1))
-    
-    return coordinates
-    
 
+    return coordinates
+
+def king_logic(y, x, board_state):
+
+    coordinates = []
+    moves = [(1, 1), (1, 0), (1, -1), (0, 1), (0, -1), (-1, 1), (-1, 0), (-1, -1)]
+
+    for dy, dx in moves:
+        cy = y + dy
+        cx = x + dx
+
+        if 0 <= cy <= 7 and 0 <= cx <= 7 and "w" in board_state[cy][cx]:
+            coordinates.append((cy, cx))
+
+    return coordinates
