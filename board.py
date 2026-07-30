@@ -14,6 +14,7 @@ class GameState():
 def logic_coordinators(y, x, board_state, move_history):
     piece = board_state[y][x]
     coordinates = []
+    output = []
     
     if "b" in piece:
         return []
@@ -22,20 +23,22 @@ def logic_coordinators(y, x, board_state, move_history):
         pass
     elif "R" in piece:
         coordinates += straights_logic(y, x, board_state)
-        return coordinates
     elif "B" in piece:
         coordinates += diagonals_logic(y, x, board_state)
-        return coordinates
     elif "Q" in piece:
         coordinates += straights_logic(y, x, board_state)
         coordinates += diagonals_logic(y, x, board_state)
-        return coordinates
     elif "N" in piece:
         coordinates += horse_logic(y, x, board_state)
-        return coordinates
     else:
         coordinates += king_logic(y, x, board_state)
-        return coordinates
+
+    for coordinate in coordinates:
+        y, x = coordinate
+        if not "w" in board_state[y][x]:
+            output.append(coordinate)
+
+    return output
 
 def straights_logic(y, x, board_state) -> list:
 
