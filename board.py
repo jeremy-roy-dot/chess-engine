@@ -20,7 +20,7 @@ def logic_coordinators(y, x, board_state, move_history):
         return []
 
     if "P" in piece:
-        pass
+        coordinates += pawn_logic(y, x, move_history, board_state)
     elif "R" in piece:
         coordinates += straights_logic(y, x, board_state)
     elif "B" in piece:
@@ -105,19 +105,19 @@ def horse_logic(y, x, board_state):
 def pawn_logic(y, x, move_history, board_state):
     coordinates = []
     
-    if y == 1:
-        if board_state[y + 1][x] == "--" and board_state[y + 2][x] == "--":
-            coordinates.append((y + 2, x))
+    if y == 6:
+        if board_state[y - 1][x] == "--" and board_state[y - 2][x] == "--":
+            coordinates.append((y - 2, x))
 
-    if board_state[y + 1][x] == "--":
-        coordinates.append((y + 1, x))
+    if board_state[y - 1][x] == "--":
+        coordinates.append((y - 1, x))
 
     if x < 7:
-        if board_state[y + 1][x + 1] != "--":
-            coordinates.append((y + 1, x + 1))
+        if board_state[y - 1][x + 1] != "--" and not "w" in board_state[y - 1][x + 1]:
+            coordinates.append((y - 1, x + 1))
     if x > 0:
-        if board_state[y + 1][x - 1] != "--":
-            coordinates.append((y + 1, x - 1))
+        if board_state[y - 1][x - 1] != "--" and not "w" in board_state[y - 1][x - 1]:
+            coordinates.append((y - 1, x - 1))
 
     return coordinates
 
