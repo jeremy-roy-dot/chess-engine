@@ -11,16 +11,16 @@ class GameState():
         self.move_history = []
 
 # Determines the piece, set the valid move rules, calls on all relevant logics, output a list of valid coordinates
-def logic_coordinators(y, x, board_state, move_history):
+def logic_coordinators(y, x, board_state, move_history, turn):
     piece = board_state[y][x]
     coordinates = []
     output = []
     
-    if "b" in piece:
+    if not turn in piece:
         return []
 
     if "P" in piece:
-        coordinates += pawn_logic(y, x, move_history, board_state)
+        coordinates += pawn_logic(y, x, move_history, board_state, turn)
     elif "R" in piece:
         coordinates += straights_logic(y, x, board_state)
     elif "B" in piece:
@@ -29,13 +29,13 @@ def logic_coordinators(y, x, board_state, move_history):
         coordinates += straights_logic(y, x, board_state)
         coordinates += diagonals_logic(y, x, board_state)
     elif "N" in piece:
-        coordinates += horse_logic(y, x, board_state)
-    else:
-        coordinates += king_logic(y, x, board_state)
+        coordinates += horse_logic(y, x)
+    elif "K" in piece:
+        coordinates += king_logic(y, x)
 
     for coordinate in coordinates:
         y, x = coordinate
-        if not "w" in board_state[y][x]:
+        if not turn in board_state[y][x]:
             output.append(coordinate)
 
     return output
@@ -89,7 +89,7 @@ def diagonals_logic(y, x, board_state):
 
     return coordinates
 
-def horse_logic(y, x, board_state):
+def horse_logic(y, x):
     directions = [(2, 1), (2, -1), (-2, 1), (-2, -1), (1, 2), (1, -2), (-1, 2), (-1, -2)]
     coordinates = []
 
@@ -97,31 +97,42 @@ def horse_logic(y, x, board_state):
         cy = y + dy
         cx = x + dx
 
-        if (0 <= cy <= 7 and 0 <= cx <= 7) and not "w" in board_state[cy][cx]:
+        if (0 <= cy <= 7 and 0 <= cx <= 7):
             coordinates.append((cy, cx))
             
     return coordinates
 
-def pawn_logic(y, x, move_history, board_state):
+def pawn_logic(y, x, move_history, board_state, turn):
     coordinates = []
-    
-    if y == 6:
-        if board_state[y - 1][x] == "--" and board_state[y - 2][x] == "--":
-            coordinates.append((y - 2, x))
 
-    if board_state[y - 1][x] == "--":
-        coordinates.append((y - 1, x))
+    b = -1 if turn == "b" else 1
+
+    if b == 1:
+        if y == 0:
+            return []
+        if y == 6:
+            if board_state[y - 1][x] == "--" and board_state[y - 2][x] == "--":
+                coordinates.append((y - 2, x))
+    else:
+        if y == 7:
+            return []
+        if y == 1:
+            if board_state[y + 1][x] == "--" and board_state[y + 2][x] == "--":
+                coordinates.append((y + 2, x))
+
+    if board_state[y - (b * 1)][x] == "--":
+        coordinates.append((y - (b * 1), x))
 
     if x < 7:
-        if board_state[y - 1][x + 1] != "--" and not "w" in board_state[y - 1][x + 1]:
-            coordinates.append((y - 1, x + 1))
+        if board_state[y - (b * 1)][x + 1] != "--" and not turn in board_state[y - (b * 1)][x + 1]:
+            coordinates.append((y - (b * 1), x + 1))
     if x > 0:
-        if board_state[y - 1][x - 1] != "--" and not "w" in board_state[y - 1][x - 1]:
-            coordinates.append((y - 1, x - 1))
+        if board_state[y - (b * 1)][x - 1] != "--" and not turn in board_state[y - (b * 1)][x - 1]:
+            coordinates.append((y - (b * 1), x - 1))
 
     return coordinates
 
-def king_logic(y, x, board_state):
+def king_logic(y, x):
 
     coordinates = []
     moves = [(1, 1), (1, 0), (1, -1), (0, 1), (0, -1), (-1, 1), (-1, 0), (-1, -1)]
@@ -130,7 +141,15 @@ def king_logic(y, x, board_state):
         cy = y + dy
         cx = x + dx
 
-        if 0 <= cy <= 7 and 0 <= cx <= 7 and "w" in board_state[cy][cx]:
+        if 0 <= cy <= 7 and 0 <= cx <= 7:
             coordinates.append((cy, cx))
 
     return coordinates
+
+
+def move(y1, x1, y2, x2, board_state, move_history):
+    piece = board_state[y1][x1]
+    board_state[y1][x1] = "--"
+    board_state[y2][x2] = piece
+    move_history.append([piece, (y1, x1), (y2, x2)])
+    return (board_state, move_history)

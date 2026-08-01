@@ -14,6 +14,8 @@ images = {}
 
 selected = False
 coordinates = None
+coordinate = None
+turn = "w"
 
 for file in assets:
     piece = file.strip(".png")
@@ -28,8 +30,7 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-            coordinates = event.pos
-            x, y = coordinates
+            x, y = event.pos
             x = (x - 560)/100 #board x coordinate
             y = (y - 140)/100 #board y coordinate
 
@@ -41,14 +42,28 @@ while running:
                 y = int(y)
             
             if 0 <= x <= 7 and 0 <= y <= 7:
-                if gs.board[y][x] != "--":
+
+                if selected and (y, x) in coordinates:
+                    y1, x1 = coordinate
+                    gs.board, gs.move_history = board.move(y1, x1, y, x, gs.board, gs.move_history)
+                    selected = False
+                    coordinates = None
+                    coordinate = None
+                    if turn == "w":
+                        turn = "b"
+                    else: 
+                        turn = "w"
+                
+                elif turn in gs.board[y][x]:
                     #Calls on move logic and highlights the selected piece, puts dots on valid squares and captures
-                    coordinates = board.logic_coordinators(y, x, gs.board, gs.move_history)
+                    coordinates = board.logic_coordinators(y, x, gs.board, gs.move_history, turn)
                     if coordinates:
                         selected = True
+                        coordinate = (y, x)
                 else:
                     coordinates = None
                     selected = False
+                    coordinate = None
             else:
                 coordinates = None
                 selected = False
@@ -65,9 +80,9 @@ while running:
     for row in range(len(gs.board)):
         for col in range(len(gs.board[row])):
             if (row + col) % 2:
-                color = (239, 255, 200)
-            else:
                 color = (59, 52, 31)
+            else:
+                color = (239, 255, 200)
             
             pygame.draw.rect(screen, color, (pixel_x, pixel_y, 100, 100))
 
