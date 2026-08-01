@@ -13,8 +13,8 @@ assets = os.listdir("assets")
 images = {}
 
 selected = False
-coordinates = None
-coordinate = None
+coordinates = []
+coordinate = (-1, -1)
 turn = "w"
 
 for file in assets:
@@ -47,8 +47,8 @@ while running:
                     y1, x1 = coordinate
                     gs.board, gs.move_history = board.move(y1, x1, y, x, gs.board, gs.move_history)
                     selected = False
-                    coordinates = None
-                    coordinate = None
+                    coordinates = []
+                    coordinate = (-1, -1)
                     if turn == "w":
                         turn = "b"
                     else: 
@@ -61,11 +61,11 @@ while running:
                         selected = True
                         coordinate = (y, x)
                 else:
-                    coordinates = None
+                    coordinates = []
                     selected = False
-                    coordinate = None
+                    coordinate = (-1, -1)
             else:
-                coordinates = None
+                coordinates = []
                 selected = False
                     
     screen.fill("Black")

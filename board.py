@@ -20,7 +20,8 @@ def logic_coordinators(y, x, board_state, move_history, turn):
         return []
 
     if "P" in piece:
-        coordinates += pawn_logic(y, x, move_history, board_state, turn)
+        coordinates += pawn_logic(y, x, board_state, turn)
+        coordinates += en_passant_logic(y, x, move_history, turn)
     elif "R" in piece:
         coordinates += straights_logic(y, x, board_state)
     elif "B" in piece:
@@ -32,6 +33,12 @@ def logic_coordinators(y, x, board_state, move_history, turn):
         coordinates += horse_logic(y, x)
     elif "K" in piece:
         coordinates += king_logic(y, x)
+        row = 7 if turn == "w" else 0
+        castling_left, castling_right = castling_logic(y, x, board_state, move_history, turn, row)
+        if castling_left:
+            coordinates.append((row, 2))
+        if castling_right:
+            coordinates.append((row, 6))
 
     for coordinate in coordinates:
         y, x = coordinate
@@ -102,12 +109,11 @@ def horse_logic(y, x):
             
     return coordinates
 
-def pawn_logic(y, x, move_history, board_state, turn):
+def pawn_logic(y, x, board_state, turn):
     coordinates = []
+    direction = -1 if turn == "b" else 1
 
-    b = -1 if turn == "b" else 1
-
-    if b == 1:
+    if direction == 1:
         if y == 0:
             return []
         if y == 6:
@@ -120,15 +126,15 @@ def pawn_logic(y, x, move_history, board_state, turn):
             if board_state[y + 1][x] == "--" and board_state[y + 2][x] == "--":
                 coordinates.append((y + 2, x))
 
-    if board_state[y - (b * 1)][x] == "--":
-        coordinates.append((y - (b * 1), x))
+    if board_state[y - (direction * 1)][x] == "--":
+        coordinates.append((y - (direction * 1), x))
 
     if x < 7:
-        if board_state[y - (b * 1)][x + 1] != "--" and not turn in board_state[y - (b * 1)][x + 1]:
-            coordinates.append((y - (b * 1), x + 1))
+        if board_state[y - (direction * 1)][x + 1] != "--" and not turn in board_state[y - (direction * 1)][x + 1]:
+            coordinates.append((y - (direction * 1), x + 1))
     if x > 0:
-        if board_state[y - (b * 1)][x - 1] != "--" and not turn in board_state[y - (b * 1)][x - 1]:
-            coordinates.append((y - (b * 1), x - 1))
+        if board_state[y - (direction * 1)][x - 1] != "--" and not turn in board_state[y - (direction * 1)][x - 1]:
+            coordinates.append((y - (direction * 1), x - 1))
 
     return coordinates
 
@@ -146,9 +152,74 @@ def king_logic(y, x):
 
     return coordinates
 
+def castling_logic(y, x, board_state, move_history, turn, row):
+    if any(move[0] == turn + "K" for move in move_history):
+        return False, False
 
+    castling_left = True
+    castling_right = True
+
+    if any(move[0] == turn + "R" and move[1] == (row, 0) for move in move_history):
+        castling_left = False
+    if any(move[0] == turn + "R" and move[1] == (row, 7) for move in move_history):
+        castling_right = False
+
+    for n in range(1, 3):
+        if not board_state[row][x + n] == "--":
+            castling_right = False
+    for n in range(1, 4):
+        if not board_state[row][x - n] == "--":
+            castling_left = False
+
+    return castling_left, castling_right
+
+def en_passant_logic(y, x, move_history, turn):
+
+    coordinates = []
+    direction = -1 if turn == "w" else 1
+
+    if not move_history:
+        return coordinates
+
+    if "P" in move_history[-1][0] and not turn in move_history[-1][0] and abs(move_history[-1][1][0] - move_history[-1][2][0]) == 2:
+        if move_history[-1][2][0] == y:
+            if x < 7 and move_history[-1][2][1] + 1 == x:
+                coordinates.append((y + direction, x - 1))
+            if x > 0 and move_history[-1][2][1] - 1 == x:
+                coordinates.append((y + direction, x + 1))
+
+    return coordinates
+        
 def move(y1, x1, y2, x2, board_state, move_history):
     piece = board_state[y1][x1]
+    turn = piece[0]
+    row = 0 if turn == "b" else 7
+
+    if "K" in piece: #Castling
+        if (x1 - x2) == 2:
+            board_state[row][x1] = "--"
+            board_state[row][x2] = piece
+            board_state[row][0] = "--"
+            board_state[row][x2 + 1] = turn + "R"
+            move_history.append([piece, (y1, x1), (y2, x2)])
+            return (board_state, move_history)
+        elif (x1 - x2) == -2:
+            board_state[row][x1] = "--"
+            board_state[row][x2] = piece
+            board_state[row][7] = "--"
+            board_state[row][x2 - 1] = turn + "R"
+            move_history.append([piece, (y1, x1), (y2, x2)])
+            return (board_state, move_history)
+
+    if "P" in piece: #En Passant
+        if x1 != x2:
+            if board_state[y2][x2] == "--":
+                board_state[y1][x1] = "--"
+                board_state[y2][x2] = piece
+                board_state[y1][x2] = "--"
+                move_history.append([piece, (y1, x1), (y2, x2)])
+
+    #Normal moves
     board_state[y1][x1] = "--"
     board_state[y2][x2] = piece
     move_history.append([piece, (y1, x1), (y2, x2)])
