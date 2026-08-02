@@ -224,3 +224,7 @@ def move(y1, x1, y2, x2, board_state, move_history):
     board_state[y2][x2] = piece
     move_history.append([piece, (y1, x1), (y2, x2)])
     return (board_state, move_history)
+
+
+def legal_moves_filter(board_state, move_history, turn):
+    pass
