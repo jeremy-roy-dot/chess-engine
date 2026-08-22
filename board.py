@@ -14,7 +14,7 @@ class GameState():
 def logic_coordinators(y, x, board_state, move_history, turn):
     piece = board_state[y][x]
     coordinates = []
-    output = []
+    legal_moves = []
     
     if not turn in piece:
         return []
@@ -32,7 +32,7 @@ def logic_coordinators(y, x, board_state, move_history, turn):
     elif "N" in piece:
         coordinates += horse_logic(y, x)
     elif "K" in piece:
-        coordinates += king_logic(y, x)
+        coordinates += king_pseudo_move(y, x, board_state)
         row = 7 if turn == "w" else 0
         castling_left, castling_right = castling_logic(y, x, board_state, move_history, turn, row)
         if castling_left:
@@ -40,17 +40,101 @@ def logic_coordinators(y, x, board_state, move_history, turn):
         if castling_right:
             coordinates.append((row, 6))
 
-    for coordinate in coordinates:
-        y, x = coordinate
-        if not turn in board_state[y][x]:
-            output.append(coordinate)
+    #Gets King's coordinates
+    ky, kx = (-1, -1)
+    for move in reversed(move_history):
+        if move[0] == turn + "K":
+            ky, kx = move[2]
+            break
+    if (ky, kx) == (-1, -1):
+        if turn == "b":
+            ky, kx, = 0, 4
+        else:
+            ky, kx = 7, 4
 
-    return output
+    pinned, attackers = king_safety_protocol(ky, kx, board_state, turn)
+    
+    #If the selected piece is the king the move calculator already be calculated all the moves possible so just send the coordinates
+    if piece == turn + "K":
+        return coordinates
 
-def straights_logic(y, x, board_state) -> list:
+    if len(attackers) == 2:
+        return []
+
+    #The full pinned move filtering
+    if (piece, y ,x) in pinned:     
+        #Filters moves that puts the king in check if the piece is pinned straight
+        if ky == y: 
+            for cy, cx in coordinates:
+                if cy != y:
+                    continue
+                legal_moves.append((cy, cx))
+        elif kx == x:
+            for cy, cx in coordinates:
+                if cx != x:
+                    continue
+                legal_moves.append((cy, cx))
+    
+        #Filters moves that puts the king in check if the piece is pinned diagonally
+        elif (y - x) == (ky - kx):
+            for cy, cx in coordinates:
+                if (cy - cx) != (y - x):
+                    continue
+                legal_moves.append((cy, cx))
+        else:
+            for cy, cx in coordinates:
+                if (cy - cx) != (y - x):
+                    continue
+                legal_moves.append((cy, cx))
+        coordinates = legal_moves
+
+    if len(attackers) == 1:
+        enemy_piece, ay, ax = attackers[0]
+
+        #Straights
+        if ay == ky:
+            for cy, cx in coordinates:
+                if cy != ay:
+                    continue
+                legal_moves.append((cy, cx))
+
+        elif ax == kx:
+            for cy, cx in coordinates:
+                if cx != ax:
+                    continue
+                legal_moves.append((cy, cx))
+
+        #Diagonals
+        elif (ay - ax) == (ky - kx):
+            for cy, cx in coordinates:
+                if (cy - cx) != (ay - ax):
+                    continue
+                legal_moves.append((cy, cx))
+        elif (ay + ax) == (ky + kx):
+            for cy, cx in coordinates:
+                if (cy + cx) != (ay + ax):
+                    continue
+                legal_moves.append((cy, cx))
+        #Knight
+        else:
+            for cy, cx in coordinates:
+                if (cy, cx) != (ax, ay):
+                    continue
+                legal_moves.append((cy, cx))
+        coordinates = legal_moves
+
+    #Filters the move list to remove all moves that takes piece's on the same
+    legal_moves = []
+    for cy, cx in coordinates:
+        if turn in board_state[cy][cx]:
+            continue
+        legal_moves.append((cy, cx))
+
+    return legal_moves
+
+def straights_logic(y, x, board_state, directions=[1, -1]) -> list:
 
     coordinates = []
-    directions = [1, -1]
 
     for direction in directions:
 
@@ -76,10 +160,9 @@ def straights_logic(y, x, board_state) -> list:
     return coordinates
 
 # When clicking something on the side of the screen it logs a case that is out of boung (doesnt crash tho) (like 6, -1)
-def diagonals_logic(y, x, board_state):
+def diagonals_logic(y, x, board_state, directions=[(1, 1), (1, -1), (-1, 1), (-1, -1)]):
     coordinates = []
-    
-    directions = [(1, 1), (1, -1), (-1, 1), (-1, -1)]
+
     for dy, dx in directions:
 
         current_y  = y + dy
@@ -130,11 +213,11 @@ def pawn_logic(y, x, board_state, turn):
         coordinates.append((y - (direction * 1), x))
 
     if x < 7:
-        if board_state[y - (direction * 1)][x + 1] != "--" and not turn in board_state[y - (direction * 1)][x + 1]:
-            coordinates.append((y - (direction * 1), x + 1))
+        if board_state[y - direction][x + 1] != "--" and not turn in board_state[y - direction][x + 1]:
+            coordinates.append((y - direction, x + 1))
     if x > 0:
-        if board_state[y - (direction * 1)][x - 1] != "--" and not turn in board_state[y - (direction * 1)][x - 1]:
-            coordinates.append((y - (direction * 1), x - 1))
+        if board_state[y - direction][x - 1] != "--" and not turn in board_state[y - direction][x - 1]:
+            coordinates.append((y - direction, x - 1))
 
     return coordinates
 
@@ -167,8 +250,14 @@ def castling_logic(y, x, board_state, move_history, turn, row):
     for n in range(1, 3):
         if not board_state[row][x + n] == "--":
             castling_right = False
+        _, attackers = king_safety_protocol(row, x + n, board_state, turn)
+        if attackers:
+            castling_right = False
     for n in range(1, 4):
         if not board_state[row][x - n] == "--":
+            castling_left = False
+        _, attackers = king_safety_protocol(row, x - n, board_state, turn)
+        if attackers:
             castling_left = False
 
     return castling_left, castling_right
@@ -226,5 +315,143 @@ def move(y1, x1, y2, x2, board_state, move_history):
     return (board_state, move_history)
 
 
-def legal_moves_filter(board_state, move_history, turn):
-    pass
+def king_safety_protocol(y, x, board_state, turn):
+
+    checker = 0
+    attackers = [] #[piece, y, x]
+    pinned = [] #[piece, y, x]
+    direction = 1 if turn == "b" else -1
+
+    diagonals = diagonals_logic(y, x, board_state)
+    straights = straights_logic(y, x, board_state)
+    horse = horse_logic(y, x)
+
+    #Pawn check checker
+    if x < 7 and "P" in board_state[y + direction][x + 1] and not turn in board_state[y + direction][x + 1]:
+        checker += 1
+        attackers.append([board_state[y + direction][x + 1], y + direction, x + 1])
+    if x > 0 and "P" in board_state[y + direction][x - 1] and not turn in board_state[y + direction][x - 1]:
+        checker += 1
+        attackers.append([board_state[y + direction][x - 1], y + direction, x - 1])
+
+    #Horse check checker
+    for cy, cx in horse:
+        if "N" in board_state[cy][cx] and not turn in board_state[cy][cx]:
+            checker += 1
+            attackers.append([board_state[cy][cx], cy, cx])
+
+    #Bishop and Queen check checker
+    for cy, cx in diagonals:
+        if "B" in board_state[cy][cx] and not turn in board_state[cy][cx]:
+            checker += 1
+            attackers.append([board_state[cy][cx], cy, cx])
+        elif "Q" in board_state[cy][cx] and not turn in board_state[cy][cx]:
+            checker += 1
+            attackers.append([board_state[cy][cx], cy, cx])
+
+        #While running the check for the diagonals, if we hit a same color piece we just continue the ray to see if it is pinned
+        if turn in board_state[cy][cx]:
+            if pins(y, x, cy, cx, board_state, turn, "diagonal"):
+                pinned.append(([board_state[cy][cx], cy, cx]))
+
+    #Rook and Queen check checker
+    for cy, cx in straights:
+        if "R" in board_state[cy][cx] and not turn in board_state[cy][cx]:
+            checker += 1
+            attackers.append([board_state[cy][cx], cy, cx])
+        elif "Q" in board_state[cy][cx] and not turn in board_state[cy][cx]:
+            checker += 1
+            attackers.append([board_state[cy][cx], cy, cx])
+
+        #While running the check for the straights, if we hit a same color piece we just continue the ray to see if it is pinned
+        if turn in board_state[cy][cx]:
+            if pins(y, x, cy, cx, board_state, turn, "straight"):
+                pinned.append(([board_state[cy][cx], cy, cx]))
+    
+    if checker == 2: #Only moves legal are the king moves
+        return pinned, attackers
+
+    if checker == 1: #Only moves legal are king moves, capturing the attacker, getting in between the attacker and the king
+        return pinned, attackers
+
+    if checker == 0: #Anything other than moving pinned pieces or the king to death
+        return pinned, attackers
+    
+def pins(ky, kx, y, x, board_state, turn, type):
+
+    dy = y - ky
+    dx = x - kx
+
+    if type == "diagonal":
+        direction = (dy // abs(dy), dx // abs(dx))
+        coordinates = diagonals_logic(y, x, board_state, [direction])
+        for ay, ax in coordinates:
+            if "Q" in board_state[ay][ax] or "R" in board_state[ay][ax]:
+                if not turn in board_state[ay][ax]:
+                    return True
+
+    elif type == "straight":
+        if dy:
+            direction = [dy // abs(dy)]
+            coordinates = straights_logic(y, x, board_state, direction)
+            for ay, ax in coordinates:
+                if ay == ky:
+                    continue
+                if "Q" or "R" in board_state[ay][ax]:
+                    if not turn in board_state[ay][ax]:
+                        return True
+        else:
+            direction = [dx // abs(dx)]
+            coordinates = straights_logic(y, x, board_state, direction)
+            for ay, ax in coordinates:
+                if ax == kx:
+                    continue
+                if "Q" or "R" in board_state[ay][ax]:
+                    if not turn in board_state[ay][ax]:
+                        return True
+    return False
+
+def king_pseudo_move(y, x, board_state):
+    valid_moves = king_logic(y, x)
+    turn = "b" if "b" in board_state[y][x] else "w"
+    enemy = "b" if turn == "w" else "w"
+    direction = 1 if "b" in board_state[y][x] else -1
+    legal_moves = []
+
+    for ky, kx in valid_moves:
+        valid = True
+        if turn in board_state[ky][kx]:
+            continue
+        if kx < 7:
+            if board_state[ky + direction][kx + 1] == enemy + "P":
+                valid = False
+                continue
+        if kx > 0:
+             if board_state[ky + direction][kx - 1] == enemy + "P":
+                valid = False
+                continue
+
+        for ty, tx in horse_logic(ky, kx):
+            if board_state[ty][tx] == enemy + "N":
+                valid = False
+                break
+        if not valid:
+            continue
+
+        for ty, tx in straights_logic(ky, kx, board_state):
+            if enemy + "R" in board_state[ty][tx] or enemy + "Q" in board_state[ty][tx]:
+                valid = False
+                break
+        if not valid:
+            continue
+
+        for ty, tx in diagonals_logic(ky, kx, board_state):
+            if enemy + "B" in board_state[ty][tx] or enemy + "Q" in board_state[ty][tx]:
+                valid = False
+                break
+        if not valid:
+            continue
+        
+        legal_moves.append((ky, kx))
+        
+    return legal_moves

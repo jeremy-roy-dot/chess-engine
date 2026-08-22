@@ -70,7 +70,7 @@ while running:
                     
     screen.fill("Black")
 
-    pygame.draw.rect(screen, (133, 203, 51), (510, 90, 900, 900))
+    pygame.draw.rect(screen, (255, 0, 0), (510, 90, 900, 900))
     pygame.draw.rect(screen, (16, 11, 0), (550, 130, 820, 820))
 
     pixel_x = 560
@@ -82,7 +82,7 @@ while running:
             if (row + col) % 2:
                 color = (59, 52, 31)
             else:
-                color = (239, 255, 200)
+                color = (255, 239, 200)
             
             pygame.draw.rect(screen, color, (pixel_x, pixel_y, 100, 100))
 
