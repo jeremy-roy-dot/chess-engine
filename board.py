@@ -12,6 +12,7 @@ class GameState():
 
 # Determines the piece, set the valid move rules, calls on all relevant logics, output a list of valid coordinates
 def logic_coordinators(y, x, board_state, move_history, turn):
+    checkmate = False
     piece = board_state[y][x]
     coordinates = []
     legal_moves = []
@@ -56,7 +57,9 @@ def logic_coordinators(y, x, board_state, move_history, turn):
     
     #If the selected piece is the king the move calculator already be calculated all the moves possible so just send the coordinates
     if piece == turn + "K":
-        return coordinates
+        if len(attackers) > 0 and not coordinates:
+            checkmate = True
+        return coordinates, checkmate
 
     if len(attackers) == 2:
         return []
@@ -312,7 +315,8 @@ def move(y1, x1, y2, x2, board_state, move_history):
     board_state[y1][x1] = "--"
     board_state[y2][x2] = piece
     move_history.append([piece, (y1, x1), (y2, x2)])
-    return (board_state, move_history)
+
+    return board_state, move_history
 
 
 def king_safety_protocol(y, x, board_state, turn):

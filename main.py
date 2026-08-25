@@ -7,6 +7,10 @@ gs = board.GameState()
 screen = pygame.display.set_mode((1920, 1080))
 clock = pygame.time.Clock()
 running = True
+turn = "w"
+player = "w"
+started = False
+checkmate = False
 
 assets = os.listdir("assets")
 
@@ -15,7 +19,6 @@ images = {}
 selected = False
 coordinates = []
 coordinate = (-1, -1)
-turn = "w"
 
 for file in assets:
     piece = file.strip(".png")
@@ -23,12 +26,34 @@ for file in assets:
     images[piece] = pygame.transform.scale(images[piece], (100, 100))
 
 circle_surface = pygame.Surface((100, 100), pygame.SRCALPHA)
-pygame.draw.circle(circle_surface, (127, 127, 127, 180), (50, 50), 20)   
+pygame.draw.circle(circle_surface, (127, 127, 127, 180), (50, 50), 20)  
+
+game_font = pygame.font.Font(None, 50)
+select_surface = game_font.render("Choose your side :",True, (255, 255, 255))
+checkmate_surface = game_font.render(f"\"{turn}\" won!", True, (255, 255, 255))
 
 while running:
+
     for event in pygame.event.get():
+
+        #Close game button
         if event.type == pygame.QUIT:
             running = False
+
+        #Selection screen options
+        if not started:
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                x, y = event.pos
+                if 455 <= x <= 495 and 95 <= y <= 135:
+                    player = "b"
+                    started = True
+                    checkmate = False
+                if 530 <= x <= 570 and 95 <= y <= 135:
+                    player = "w"
+                    started = True
+                    checkmate = False
+
+        #Piece selection detection
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             x, y = event.pos
             x = (x - 560)/100 #board x coordinate
@@ -49,6 +74,7 @@ while running:
                     selected = False
                     coordinates = []
                     coordinate = (-1, -1)
+
                     if turn == "w":
                         turn = "b"
                     else: 
@@ -98,6 +124,17 @@ while running:
             y = y * 100 + 140
             x = x * 100 + 560
             screen.blit(circle_surface, (x, y))
+
+    if not started:
+        pygame.draw.rect(screen, (0, 0, 0), (510, 90, 900, 900))
+        screen.blit(select_surface, (100, 100))
+        pygame.draw.rect(screen, (255, 0, 0), (450, 90, 50, 50))
+        pygame.draw.rect(screen, (0, 0, 0), (455, 95, 40, 40))
+        pygame.draw.rect(screen, (255, 0, 0), (525, 90, 50, 50))
+        pygame.draw.rect(screen, (255, 255, 255), (530, 95, 40, 40))     
+
+    if checkmate:
+        screen.blit(checkmate_surface, (100, 150))
     
     pygame.display.flip()
 
