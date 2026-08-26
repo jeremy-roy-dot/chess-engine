@@ -459,3 +459,23 @@ def king_pseudo_move(y, x, board_state):
         legal_moves.append((ky, kx))
         
     return legal_moves
+
+def is_checkmate(board_state, move_history, turn):
+
+    #Gets King's coordinates
+    ky, kx = (-1, -1)
+    for move in reversed(move_history):
+        if move[0] == turn + "K":
+            ky, kx = move[2]
+            break
+        if (ky, kx) == (-1, -1):
+            if turn == "b":
+                ky, kx, = 0, 4
+            else:
+                ky, kx = 7, 4
+    pinned, attackers = king_safety_protocol(ky, kx, board_state, turn)
+
+    if len(attackers) != 0:
+        if not king_pseudo_move(ky, kx, board_state):
+            return True
+    return False

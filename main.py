@@ -30,10 +30,8 @@ pygame.draw.circle(circle_surface, (127, 127, 127, 180), (50, 50), 20)
 
 game_font = pygame.font.Font(None, 50)
 select_surface = game_font.render("Choose your side :",True, (255, 255, 255))
-checkmate_surface = game_font.render(f"\"{turn}\" won!", True, (255, 255, 255))
 
 while running:
-
     for event in pygame.event.get():
 
         #Close game button
@@ -48,10 +46,13 @@ while running:
                     player = "b"
                     started = True
                     checkmate = False
-                if 530 <= x <= 570 and 95 <= y <= 135:
+                    gs = board.GameState()
+
+                elif 530 <= x <= 570 and 95 <= y <= 135:
                     player = "w"
                     started = True
                     checkmate = False
+                    gs = board.GameState()
 
         #Piece selection detection
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
@@ -79,6 +80,13 @@ while running:
                         turn = "b"
                     else: 
                         turn = "w"
+
+                    checkmate = board.is_checkmate(gs.board, gs.move_history, turn)
+                    if checkmate:
+                        started = False
+                        if turn == "w":
+                            turn = "b"
+                        
                 
                 elif turn in gs.board[y][x]:
                     #Calls on move logic and highlights the selected piece, puts dots on valid squares and captures
@@ -132,9 +140,6 @@ while running:
         pygame.draw.rect(screen, (0, 0, 0), (455, 95, 40, 40))
         pygame.draw.rect(screen, (255, 0, 0), (525, 90, 50, 50))
         pygame.draw.rect(screen, (255, 255, 255), (530, 95, 40, 40))     
-
-    if checkmate:
-        screen.blit(checkmate_surface, (100, 150))
     
     pygame.display.flip()
 
