@@ -19,7 +19,11 @@ def position_evaluation(board_state, move_history): #evaluates with the system a
             #Raw points for the pieces
             if "P" in piece:
                 points += 100 * side
-                #if board_state[row][column was making pawn connection checker
+                #making pawn connection evaluation
+                if side == -1:
+                    pass
+                else:
+                    pass
             elif ("B" or "N") in piece:
                 points += 300 * side
             elif "R" in piece:
