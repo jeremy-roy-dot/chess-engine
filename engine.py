@@ -22,18 +22,25 @@ def position_evaluation(board_state, move_history): #evaluates with the system a
                 #Connected pawn evaluator
                 if column > 0:
                     if row > 0 and piece in board_state[row - 1][column - 1]:
-                        points += 50
+                        points += 50 * side
                     if row < 7 and piece in board_state[row + 1][column - 1]:
-                        points += 50
+                        points += 50 * side
                     if piece in board_state[row][column - 1]:
-                        points -= 50
+                        points += 25 * side
                 if column < 7:
                     if row > 0 and piece in board_state[row - 1][column + 1]:
-                        points += 50
+                        points += 50 * side
                     if row < 7 and piece in board_state[row + 1][column + 1]:
-                        points += 50
+                        points += 50 * side
                     if piece in board_state[row][column + 1]:
-                        points -= 50
+                        points += 25 * side
+                for n in range(0, 8):
+                    if n == column:
+                        continue
+                    x = n
+                    y = row
+                    if piece in board_state[y][x]:
+                        points -= 50 * side
 
             elif ("B" or "N") in piece:
                 points += 300 * side
