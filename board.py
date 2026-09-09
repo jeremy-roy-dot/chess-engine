@@ -526,6 +526,8 @@ def king_pseudo_move(y, x, board_state):
 
 def is_checkmate(board_state, move_history, turn):
 
+    legal_moves = []
+
     #Gets King's coordinates
     ky, kx = (-1, -1)
     for move in reversed(move_history):
@@ -544,4 +546,14 @@ def is_checkmate(board_state, move_history, turn):
     if king_pseudo_move(ky, kx, board_state):
         return False
 
-    
+    for y in range(8):
+        for x in range(8):
+            piece = board_state[y][x]
+            if not turn in piece or piece == "--":
+                continue
+            legal_moves.extend(logic_coordinators(y, x, board_state, move_history, turn))
+
+    if legal_moves:
+        return False
+
+    return True

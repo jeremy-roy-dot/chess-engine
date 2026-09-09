@@ -1,6 +1,5 @@
 #To-Do:
-#   - Optimize board evaluation (pinned, attackers, etc) so you only do it once per board
-#   - Fix checkmate not looking at pieces that could block the attack
+#   - Optimize everything, specifically the king pseudo move and king_safety protocol, overall it's probably called 5 times per click on a piece
 
 import pygame
 import board
