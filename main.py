@@ -1,3 +1,7 @@
+#To-Do:
+#   - Fix the x-ray problem, the side logic for straight checks causes all moves between attacker and king to stop working and I just didn't implement the diagonal part so the game still thinks a queen on the other side of the king will block a bishop
+#   - Optimize board evaluation (pinned, attackers, etc) so you only do it once per board
+
 import pygame
 import board
 import os
@@ -11,6 +15,7 @@ turn = "w"
 player = "w"
 started = False
 checkmate = False
+promotion = False
 
 assets = os.listdir("assets")
 
@@ -76,6 +81,10 @@ while running:
                     coordinates = []
                     coordinate = (-1, -1)
 
+                    if y == 7 or y == 0:
+                        if "P" in gs.board[y][x]:
+                            gs.board[y][x] = turn + "Q"
+                            
                     if turn == "w":
                         turn = "b"
                     else: 

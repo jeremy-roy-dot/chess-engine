@@ -16,30 +16,34 @@ def position_evaluation(board_state, move_history): #evaluates with the system a
             else:
                 side = 1
 
-            #Raw points for the pieces
+            #Raw points for the pieces are the points with no conditionnals
+
+            #Pawn points logic
             if "P" in piece:
                 points += 100 * side
                 #Connected pawn evaluator
                 if column > 0:
                     if row > 0 and piece in board_state[row - 1][column - 1]:
-                        points += 50 * side
-                    if row < 7 and piece in board_state[row + 1][column - 1]:
-                        points += 50 * side
-                    if piece in board_state[row][column - 1]:
                         points += 25 * side
+                    if row < 7 and piece in board_state[row + 1][column - 1]:
+                        points += 25 * side
+                    if piece in board_state[row][column - 1]:
+                        points += 10 * side
                 if column < 7:
                     if row > 0 and piece in board_state[row - 1][column + 1]:
-                        points += 50 * side
-                    if row < 7 and piece in board_state[row + 1][column + 1]:
-                        points += 50 * side
-                    if piece in board_state[row][column + 1]:
                         points += 25 * side
+                    if row < 7 and piece in board_state[row + 1][column + 1]:
+                        points += 25 * side
+                    if piece in board_state[row][column + 1]:
+                        points += 10 * side
+
+                #Checks for doubled pawns
+                doubled_pawn = 0
                 for n in range(0, 8):
                     if n == column:
                         continue
-                    x = n
                     y = row
-                    if piece in board_state[y][x]:
+                    if piece in board_state[y][n] and doubled_pawn > 1:
                         points -= 50 * side
 
             elif ("B" or "N") in piece:
