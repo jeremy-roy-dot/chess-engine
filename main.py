@@ -1,6 +1,6 @@
 #To-Do:
-#   - Fix the x-ray problem, the side logic for straight checks causes all moves between attacker and king to stop working and I just didn't implement the diagonal part so the game still thinks a queen on the other side of the king will block a bishop
 #   - Optimize board evaluation (pinned, attackers, etc) so you only do it once per board
+#   - Fix checkmate not looking at pieces that could block the attack
 
 import pygame
 import board

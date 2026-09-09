@@ -110,7 +110,6 @@ def logic_coordinators(y, x, board_state, move_history, turn):
                 if cy != ay:
                     continue
                 legal_moves.append((cy, cx))
-
         elif ax == kx:
             side = 1 if ky > ay else 0
             for cy, cx in coordinates:
@@ -126,13 +125,26 @@ def logic_coordinators(y, x, board_state, move_history, turn):
 
         #Diagonals
         elif (ay - ax) == (ky - kx):
-            #Implement diagonal in between logic with the side variable
+            side = 1 if ay > ky else 0
             for cy, cx in coordinates:
+                if side:
+                    if cy < ky:
+                        continue
+                else:
+                    if cy > ky:
+                        continue
                 if (cy - cx) != (ay - ax):
                     continue
                 legal_moves.append((cy, cx))
         elif (ay + ax) == (ky + kx):
+            side = 1 if ay > ky else 0
             for cy, cx in coordinates:
+                if side:
+                    if cy < ky:
+                        continue
+                else:
+                    if cy > ky:
+                        continue
                 if (cy + cx) != (ay + ax):
                     continue
                 legal_moves.append((cy, cx))
@@ -514,10 +526,6 @@ def king_pseudo_move(y, x, board_state):
 
 def is_checkmate(board_state, move_history, turn):
 
-
-    #Turned off for test purposes
-    return False
-
     #Gets King's coordinates
     ky, kx = (-1, -1)
     for move in reversed(move_history):
@@ -531,7 +539,9 @@ def is_checkmate(board_state, move_history, turn):
                 ky, kx = 7, 4
     pinned, attackers = king_safety_protocol(ky, kx, board_state, turn)
 
-    if len(attackers) != 0:
-        if not king_pseudo_move(ky, kx, board_state):
-            return True
-    return False
+    if len(attackers) == 0:
+        return False
+    if king_pseudo_move(ky, kx, board_state):
+        return False
+
+    
