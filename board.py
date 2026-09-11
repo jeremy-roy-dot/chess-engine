@@ -11,14 +11,14 @@ class GameState():
         self.move_history = []
 
 # Determines the piece, set the valid move rules, calls on all relevant logics, output a list of valid coordinates
-def logic_coordinators(y, x, board_state, move_history, turn):
+def logic_coordinators(y, x, board_state, move_history, turn, pinned = None, attackers = None):
     checkmate = False
     piece = board_state[y][x]
     coordinates = []
     legal_moves = []
     
     if not turn in piece:
-        return []
+        return [], pinned, attackers
 
     if "P" in piece:
         coordinates += pawn_logic(y, x, board_state, turn)
@@ -52,15 +52,15 @@ def logic_coordinators(y, x, board_state, move_history, turn):
             ky, kx, = 0, 4
         else:
             ky, kx = 7, 4
-
-    pinned, attackers = king_safety_protocol(ky, kx, board_state, turn)
+    if not pinned:
+        pinned, attackers = king_safety_protocol(ky, kx, board_state, turn)
     
     #If the selected piece is the king the move calculator already calculated all the moves possible so just send the coordinates
     if piece == turn + "K":
-        return coordinates
+        return coordinates, pinned, attackers
 
     if len(attackers) == 2:
-        return []
+        return [], pinned, attackers
 
     #The full pinned move filtering
     if (y ,x) in pinned:     
@@ -164,7 +164,7 @@ def logic_coordinators(y, x, board_state, move_history, turn):
             continue
         legal_moves.append((cy, cx))
 
-    return legal_moves
+    return legal_moves, pinned, attackers
 
 def straights_logic(y, x, board_state, directions=[1, -1]) -> list:
 
@@ -551,7 +551,8 @@ def is_checkmate(board_state, move_history, turn):
             piece = board_state[y][x]
             if not turn in piece or piece == "--":
                 continue
-            legal_moves.extend(logic_coordinators(y, x, board_state, move_history, turn))
+            moves, _, _ = logic_coordinators(y, x, board_state, move_history, turn, pinned, attackers)
+            legal_moves.extend(moves)
 
     if legal_moves:
         return False

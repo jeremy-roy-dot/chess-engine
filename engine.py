@@ -78,7 +78,15 @@ def position_evaluation(board_state, move_history): #evaluates with the system a
                 else:
                     points -= 100 * side
                     
-            legal_moves = board.logic_coordinators(row, column, board_state, move_history, turn = "b" if side == -1 else "w")
+            legal_moves, _, _ = board.logic_coordinators(
+                row,
+                column,
+                board_state,
+                move_history,
+                turn="b" if side == -1 else "w",
+                pinned=None,
+                attackers=None,
+            )
 
             #Adds points for each possible moves, if the move is in the center of the board you get more
             for x, y in legal_moves:

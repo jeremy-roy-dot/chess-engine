@@ -1,6 +1,3 @@
-#To-Do:
-#   - Optimize everything, specifically the king pseudo move and king_safety protocol, overall it's probably called 5 times per click on a piece
-
 import pygame
 import board
 import os
@@ -15,6 +12,9 @@ player = "w"
 started = False
 checkmate = False
 promotion = False
+pinned = None
+attackers = None
+
 
 assets = os.listdir("assets")
 
@@ -77,6 +77,8 @@ while running:
                     y1, x1 = coordinate
                     gs.board, gs.move_history = board.move(y1, x1, y, x, gs.board, gs.move_history)
                     selected = False
+                    attackers = None
+                    pinned = None
                     coordinates = []
                     coordinate = (-1, -1)
 
@@ -98,7 +100,7 @@ while running:
                 
                 elif turn in gs.board[y][x]:
                     #Calls on move logic and highlights the selected piece, puts dots on valid squares and captures
-                    coordinates = board.logic_coordinators(y, x, gs.board, gs.move_history, turn)
+                    coordinates, pinned, attackers = board.logic_coordinators(y, x, gs.board, gs.move_history, turn, pinned, attackers)
                     if coordinates:
                         selected = True
                         coordinate = (y, x)
