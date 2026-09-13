@@ -276,18 +276,26 @@ def castling_logic(y, x, board_state, move_history, turn, row):
     castling_left = True
     castling_right = True
 
-    if any(move[0] == turn + "R" and move[1] == (row, 0) for move in move_history):
+    if any(move[1] == (row, 0) for move in move_history):
         castling_left = False
-    if any(move[0] == turn + "R" and move[1] == (row, 7) for move in move_history):
+    if any(move[1] == (row, 7) for move in move_history):
         castling_right = False
 
+    _, attackers = king_safety_protocol(y, x, board_state, turn)
+    if attackers:
+        return False, False
+
     for n in range(1, 3):
+        if x + n > 7:
+            continue
         if not board_state[row][x + n] == "--":
             castling_right = False
         _, attackers = king_safety_protocol(row, x + n, board_state, turn)
         if attackers:
             castling_right = False
     for n in range(1, 4):
+        if x - n < 0:
+            continue
         if not board_state[row][x - n] == "--":
             castling_left = False
         _, attackers = king_safety_protocol(row, x - n, board_state, turn)
@@ -534,11 +542,11 @@ def is_checkmate(board_state, move_history, turn):
         if move[0] == turn + "K":
             ky, kx = move[2]
             break
-        if (ky, kx) == (-1, -1):
-            if turn == "b":
-                ky, kx, = 0, 4
-            else:
-                ky, kx = 7, 4
+    if (ky, kx) == (-1, -1):
+        if turn == "b":
+            ky, kx, = 0, 4
+        else:
+            ky, kx = 7, 4
     pinned, attackers = king_safety_protocol(ky, kx, board_state, turn)
 
     if len(attackers) == 0:

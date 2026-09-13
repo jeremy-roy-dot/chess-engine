@@ -1,5 +1,6 @@
 import pygame
 import board
+import engine
 import os
 
 pygame.init()
@@ -48,15 +49,36 @@ while running:
                 x, y = event.pos
                 if 455 <= x <= 495 and 95 <= y <= 135:
                     player = "b"
+                    turn = "w"
                     started = True
                     checkmate = False
                     gs = board.GameState()
 
                 elif 530 <= x <= 570 and 95 <= y <= 135:
                     player = "w"
+                    turn = "w"
                     started = True
                     checkmate = False
                     gs = board.GameState()
+            continue
+
+        #bot moves
+        if turn != player:
+            bot_move = engine.bot_logic(gs.board, gs.move_history, turn)
+            gs.board, gs.move_history = board.move(bot_move[1][0], bot_move[1][1], bot_move[2][0], bot_move[2][1], gs.board, gs.move_history)
+
+            if bot_move[2][0] == 7 or bot_move[2][0] == 0:
+                if "P" in gs.board[bot_move[2][0]][bot_move[2][1]]:
+                    gs.board[bot_move[2][0]][bot_move[2][1]] = turn + "Q"
+
+            if turn == "w":
+                turn = "b"
+            else: 
+                turn = "w"
+
+            checkmate = board.is_checkmate(gs.board, gs.move_history, turn)
+            if checkmate:
+                started = False
 
         #Piece selection detection
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
@@ -94,16 +116,12 @@ while running:
                     checkmate = board.is_checkmate(gs.board, gs.move_history, turn)
                     if checkmate:
                         started = False
-                        if turn == "w":
-                            turn = "b"
-                        
                 
                 elif turn in gs.board[y][x]:
                     #Calls on move logic and highlights the selected piece, puts dots on valid squares and captures
                     coordinates, pinned, attackers = board.logic_coordinators(y, x, gs.board, gs.move_history, turn, pinned, attackers)
-                    if coordinates:
-                        selected = True
-                        coordinate = (y, x)
+                    selected = True
+                    coordinate = (y, x)
                 else:
                     coordinates = []
                     selected = False
