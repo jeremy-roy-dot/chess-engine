@@ -124,30 +124,17 @@ def logic_coordinators(y, x, board_state, move_history, turn, pinned = None, att
                 legal_moves.append((cy, cx))
 
         #Diagonals
+                # Diagonals
         elif (ay - ax) == (ky - kx):
-            side = 1 if ay > ky else 0
             for cy, cx in coordinates:
-                if side:
-                    if cy < ky:
-                        continue
-                else:
-                    if cy > ky:
-                        continue
-                if (cy - cx) != (ay - ax):
-                    continue
-                legal_moves.append((cy, cx))
+                if (cy - cx) == (ay - ax) and min(ky, ay) < cy < max(ky, ay):
+                    legal_moves.append((cy, cx))
+
         elif (ay + ax) == (ky + kx):
-            side = 1 if ay > ky else 0
             for cy, cx in coordinates:
-                if side:
-                    if cy < ky:
-                        continue
-                else:
-                    if cy > ky:
-                        continue
-                if (cy + cx) != (ay + ax):
-                    continue
-                legal_moves.append((cy, cx))
+                if (cy + cx) == (ay + ax) and min(ky, ay) < cy < max(ky, ay):
+                    legal_moves.append((cy, cx))
+
         #Knight
         else:
             for cy, cx in coordinates:
