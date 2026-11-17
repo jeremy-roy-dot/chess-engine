@@ -84,7 +84,7 @@ def logic_coordinators(y, x, board_state, move_history, turn, pinned = None, att
                 legal_moves.append((cy, cx))
         else:
             for cy, cx in coordinates:
-                if (cy - cx) != (y - x):
+                if (cy + cx) != (y + x):
                     continue
                 legal_moves.append((cy, cx))
         coordinates = legal_moves
